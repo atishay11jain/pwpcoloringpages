@@ -1,0 +1,19 @@
+# Cloudflare Pages + Wrangler Configuration
+
+name = "pwpcoloringpages"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = ".vercel/output/static"
+
+# D1 Database — used for wrangler d1 CLI commands (migrations etc.)
+# The app itself connects via REST API using env vars, not bindings.
+[[d1_databases]]
+binding = "DB"
+database_name = "coloring-pages-db"
+database_id = "0acef885-7af2-4ff1-a8c1-9aa12a89e375"
+
+# R2 Bucket — used for wrangler r2 CLI commands
+[[r2_buckets]]
+binding = "R2_BUCKET"
+bucket_name = "coloring-pages-storage"
+preview_bucket_name = "coloring-pages-storage-preview"
