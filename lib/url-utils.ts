@@ -3,6 +3,19 @@
  */
 
 /**
+ * Convert an R2 storage key to a public URL.
+ * Pure string function — no AWS SDK required.
+ */
+export function getPublicAssetUrl(key: string): string {
+  if (key.startsWith('http://') || key.startsWith('https://')) return key;
+  const publicUrl = process.env.CLOUDFLARE_R2_PUBLIC_URL;
+  if (publicUrl) return `${publicUrl}/${key}`;
+  const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
+  const bucket = process.env.CLOUDFLARE_R2_BUCKET;
+  return `https://${bucket}.${accountId}.r2.dev/${key}`;
+}
+
+/**
  * Convert a database slug to a page URL
  * Database slug: "cute-mermaid"
  * Page URL: "/cute-mermaid-coloring-page"

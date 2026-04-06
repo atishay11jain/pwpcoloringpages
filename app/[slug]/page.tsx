@@ -12,26 +12,20 @@ import {
   getCategoryById,
   type ColoringPageAsset,
 } from '@/lib/db';
-import { getPublicUrl } from '@/lib/r2';
+import { getPublicAssetUrl } from '@/lib/url-utils';
 
 async function getColoringPage(slug: string): Promise<SinglePageResponse | null> {
   try {
-    // Try the slug as-is first; if not found, strip a trailing '-coloring-page' suffix and retry
+    // Try slug as-is; if not found, strip trailing '-coloring-page' and retry
     let page = await getColoringPageWithAssets(slug);
     if (!page && slug.endsWith('-coloring-page')) {
       page = await getColoringPageWithAssets(slug.replace(/-coloring-page$/, ''));
     }
-
     if (!page) return null;
 
-    // Parse possible_categories JSON string (array of category IDs)
     let possibleCategoryIds: string[] = [];
     if (page.possible_categories) {
-      try {
-        possibleCategoryIds = JSON.parse(page.possible_categories);
-      } catch (e) {
-        console.error('Failed to parse possible_categories:', e);
-      }
+      try { possibleCategoryIds = JSON.parse(page.possible_categories); } catch { /* ignore */ }
     }
 
     const [primaryCategory, relatedCats] = await Promise.all([
@@ -52,9 +46,9 @@ async function getColoringPage(slug: string): Promise<SinglePageResponse | null>
       ageRange: page.age_range,
       assets: page.assets.map((asset: ColoringPageAsset) => ({
         mode: asset.mode,
-        thumbnailUrl: asset.thumbnail_url ? getPublicUrl(asset.thumbnail_url) : null,
-        jpegUrl: asset.jpeg_url ? getPublicUrl(asset.jpeg_url) : null,
-        pdfUrl: asset.pdf_url ? getPublicUrl(asset.pdf_url) : null,
+        thumbnailUrl: asset.thumbnail_url ? getPublicAssetUrl(asset.thumbnail_url) : null,
+        jpegUrl: asset.jpeg_url ? getPublicAssetUrl(asset.jpeg_url) : null,
+        pdfUrl: asset.pdf_url ? getPublicAssetUrl(asset.pdf_url) : null,
       })),
       isPopular: Boolean(page.is_popular),
       ratingSum: page.rating_sum ?? 0,
