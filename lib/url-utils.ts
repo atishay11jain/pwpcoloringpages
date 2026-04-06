@@ -7,11 +7,22 @@
  * Pure string function — no AWS SDK required.
  */
 export function getPublicAssetUrl(key: string): string {
-  if (key.startsWith('http://') || key.startsWith('https://')) return key;
   const publicUrl = process.env.CLOUDFLARE_R2_PUBLIC_URL;
-  if (publicUrl) return `${publicUrl}/${key}`;
   const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
   const bucket = process.env.CLOUDFLARE_R2_BUCKET;
+
+  if (key.startsWith('http://') || key.startsWith('https://')) {
+    // If a full URL was stored in the DB using the private bucket domain, rewrite it to the public URL.
+    if (publicUrl && accountId && bucket) {
+      const privateBucketBase = `https://${bucket}.${accountId}.r2.dev/`;
+      if (key.startsWith(privateBucketBase)) {
+        return publicUrl + '/' + key.slice(privateBucketBase.length);
+      }
+    }
+    return key;
+  }
+
+  if (publicUrl) return `${publicUrl}/${key}`;
   return `https://${bucket}.${accountId}.r2.dev/${key}`;
 }
 
