@@ -20,7 +20,7 @@ export default function Hero() {
             fill
             sizes="(max-width: 640px) 56px, (max-width: 768px) 64px, (max-width: 1024px) 80px, 96px"
             className="object-contain"
-            priority
+            loading="lazy"
           />
         </div>
 
@@ -34,7 +34,7 @@ export default function Hero() {
             fill
             sizes="(max-width: 640px) 48px, (max-width: 768px) 56px, 80px"
             className="object-contain"
-            priority
+            loading="lazy"
           />
         </div>
 
@@ -48,7 +48,7 @@ export default function Hero() {
             fill
             sizes="(max-width: 640px) 40px, (max-width: 768px) 48px, 64px"
             className="object-contain"
-            priority
+            loading="lazy"
           />
         </div>
 
@@ -62,7 +62,7 @@ export default function Hero() {
             fill
             sizes="(max-width: 640px) 48px, (max-width: 768px) 56px, 80px"
             className="object-contain"
-            priority
+            loading="lazy"
           />
         </div>
 
@@ -107,8 +107,7 @@ export default function Hero() {
 
         <p className="text-base sm:text-lg md:text-xl text-white/70 max-w-3xl mx-auto mb-8 sm:mb-12 leading-relaxed font-dm-sans px-2">
           Download and print hundreds of free coloring pages as PDF or JPEG — animals, nature, characters,
-          mandalas, and more. Perfect for toddlers, kids, teens, and adults who love to color!
-        </p>
+          mandalas, and more. Perfect for toddlers, kids, teens, and adults who love to color!</p>
 
         <Link
           href="/free-coloring-pages"

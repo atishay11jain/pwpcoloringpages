@@ -4,22 +4,69 @@ import type { Metadata } from 'next';
 import CategoryColoringPages from '@/components/CategoryColoringPages';
 import ColoringPageClient from '@/components/ColoringPageClient';
 import type { SinglePageResponse } from '@/app/api/pages/[slug]/route';
-import { getCategoryWithCount, getPublishedCategoryFAQs } from '@/lib/db';
+import {
+  getCategoryWithCount,
+  getPublishedCategoryFAQs,
+  getColoringPageWithAssets,
+  getRelatedCategories,
+  getCategoryById,
+  type ColoringPageAsset,
+} from '@/lib/db';
+import { getPublicUrl } from '@/lib/r2';
 
 async function getColoringPage(slug: string): Promise<SinglePageResponse | null> {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-
-    // The API will handle removing '-coloring-page' suffix
-    const response = await fetch(`${baseUrl}/api/pages/${slug}`, {
-      next: { revalidate: 300 }, // Revalidate every 5 minutes
-    });
-
-    if (!response.ok) {
-      return null;
+    // Try the slug as-is first; if not found, strip a trailing '-coloring-page' suffix and retry
+    let page = await getColoringPageWithAssets(slug);
+    if (!page && slug.endsWith('-coloring-page')) {
+      page = await getColoringPageWithAssets(slug.replace(/-coloring-page$/, ''));
     }
 
-    return response.json();
+    if (!page) return null;
+
+    // Parse possible_categories JSON string (array of category IDs)
+    let possibleCategoryIds: string[] = [];
+    if (page.possible_categories) {
+      try {
+        possibleCategoryIds = JSON.parse(page.possible_categories);
+      } catch (e) {
+        console.error('Failed to parse possible_categories:', e);
+      }
+    }
+
+    const [primaryCategory, relatedCats] = await Promise.all([
+      getCategoryById(page.category_id),
+      possibleCategoryIds.length > 0 ? getRelatedCategories(possibleCategoryIds) : Promise.resolve([]),
+    ]);
+
+    return {
+      id: page.id,
+      title: page.title,
+      slug: page.slug,
+      description: page.description,
+      categoryId: page.category_id,
+      categoryName: primaryCategory?.name ?? null,
+      categorySlug: primaryCategory?.slug ?? null,
+      possibleCategories: relatedCats.map(c => ({ name: c.name, slug: c.slug })),
+      difficulty: page.difficulty,
+      ageRange: page.age_range,
+      assets: page.assets.map((asset: ColoringPageAsset) => ({
+        mode: asset.mode,
+        thumbnailUrl: asset.thumbnail_url ? getPublicUrl(asset.thumbnail_url) : null,
+        jpegUrl: asset.jpeg_url ? getPublicUrl(asset.jpeg_url) : null,
+        pdfUrl: asset.pdf_url ? getPublicUrl(asset.pdf_url) : null,
+      })),
+      isPopular: Boolean(page.is_popular),
+      ratingSum: page.rating_sum ?? 0,
+      ratingCount: page.rating_count ?? 0,
+      printingTips: page.printing_tips ?? null,
+      meta: {
+        title: page.meta_title,
+        description: page.meta_description,
+        keywords: page.meta_keywords,
+      },
+      updatedAt: page.updated_at,
+    };
   } catch (error) {
     console.error('Error fetching coloring page:', error);
     return null;
