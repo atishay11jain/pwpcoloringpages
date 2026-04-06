@@ -1,9 +1,13 @@
-# Cloudflare Pages + Wrangler Configuration
+# Cloudflare Workers + OpenNext Configuration
 
 name = "pwpcoloringpages"
 compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
-pages_build_output_dir = ".vercel/output/static"
+main = ".open-next/worker.js"
+
+[assets]
+directory = ".open-next/assets"
+binding = "ASSETS"
 
 # D1 Database — used for wrangler d1 CLI commands (migrations etc.)
 # The app itself connects via REST API using env vars, not bindings.
