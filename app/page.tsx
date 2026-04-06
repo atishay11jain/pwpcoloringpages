@@ -1,65 +1,78 @@
-import Image from "next/image";
+import Hero from '@/components/Hero';
+import TrustStatsBar from '@/components/TrustStatsBar';
+import BrowseByCategoryGrid from '@/components/BrowseByCategoryGrid';
+import TrendingCarousel from '@/components/TrendingCarousel';
+import RecentlyAddedSection from '@/components/RecentlyAddedSection';
+import AgeAudienceNav from '@/components/AgeAudienceNav';
+import SeasonalSpotlight from '@/components/SeasonalSpotlight';
+import EditorialSEOBlock from '@/components/EditorialSEOBlock';
+import HomeFAQSection from '@/components/HomeFAQSection';
+import NewsletterSection from '@/components/NewsletterSection';
+import { getPopularPages } from '@/lib/db';
+import { getPublicUrl } from '@/lib/r2';
 
-export default function Home() {
+// Fallback static data shown when no pages have is_popular = 1 in the database
+const FALLBACK_TRENDING = [
+  { title: 'Spiderman Coloring Pages', imageUrl: 'https://placehold.co/400x533/dc2626/ffffff?text=Spiderman', href: '/coloring-pages/spiderman' },
+  { title: 'Pokemon Coloring Pages', imageUrl: 'https://placehold.co/400x533/eab308/ffffff?text=Pokemon', href: '/coloring-pages/pokemon' },
+  { title: 'Thanksgiving Coloring Pages', imageUrl: 'https://placehold.co/400x533/f97316/ffffff?text=Thanksgiving', href: '/coloring-pages/thanksgiving' },
+  { title: 'Mermaid Coloring Pages', imageUrl: 'https://placehold.co/400x533/8b5cf6/ffffff?text=Mermaid', href: '/coloring-pages/mermaid' },
+  { title: 'Butterfly Coloring Pages', imageUrl: 'https://placehold.co/400x533/ec4899/ffffff?text=Butterfly', href: '/coloring-pages/butterfly' },
+  { title: 'Kitty Coloring Pages', imageUrl: 'https://placehold.co/400x533/be185d/ffffff?text=Kitty', href: '/coloring-pages/kitty' },
+  { title: 'Cute Coloring Pages', imageUrl: 'https://placehold.co/400x533/f59e0b/ffffff?text=Cute', href: '/coloring-pages/cute' },
+];
+
+export default async function Home() {
+  // Fetch pages marked as popular (is_popular = 1) from the database
+  let trendingItems = FALLBACK_TRENDING;
+
+  try {
+    const popularPages = await getPopularPages(7);
+
+    if (popularPages.length > 0) {
+      trendingItems = popularPages.map((page) => ({
+        title: page.title,
+        imageUrl: page.bw_preview
+          ? getPublicUrl(page.bw_preview)
+          : `https://placehold.co/400x533/8b5cf6/ffffff?text=${encodeURIComponent(page.title)}`,
+        href: `/${page.slug}`,
+      }));
+    }
+  } catch {
+    // DB unavailable — fallback data is already set above
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+    <main className="min-h-screen bg-[#0a0a0f]">
+      {/* 1. Hero */}
+      <Hero />
+    
+      {/* 2. Trending Carousel */}
+      <TrendingCarousel items={trendingItems} />
+
+      {/* 3. Trust / Stats Bar */}
+      <TrustStatsBar />
+
+      {/* 4. Browse by Category Grid */}
+      <BrowseByCategoryGrid />
+
+      {/* 5. Recently Added */}
+      <RecentlyAddedSection />
+
+      {/* 6. Age / Audience Navigation */}
+      <AgeAudienceNav />
+
+      {/* 7. Seasonal Spotlight */}
+      <SeasonalSpotlight />
+
+      {/* 8. Editorial SEO Text Block */}
+      <EditorialSEOBlock />
+
+      {/* 9. FAQ Section */}
+      <HomeFAQSection />
+
+      {/* 10. Newsletter CTA */}
+      <NewsletterSection />
+    </main>
   );
 }
