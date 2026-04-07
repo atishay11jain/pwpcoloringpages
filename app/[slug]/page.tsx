@@ -191,11 +191,26 @@ export default async function ColoringPageDetail({ params }: { params: Promise<{
   if (slug.endsWith('-coloring-pages')) {
     const categorySlug = slug.replace('-coloring-pages', '');
 
-    // Fetch FAQs for FAQPage schema (non-blocking — empty array if none)
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://pwpcoloringpages.com';
     let categoryFaqSchema: object | null = null;
+    let collectionSchema: object | null = null;
     try {
       const category = await getCategoryWithCount(categorySlug);
       if (category) {
+        collectionSchema = {
+          '@context': 'https://schema.org',
+          '@type': 'CollectionPage',
+          name: `Free ${category.name} Coloring Pages`,
+          description: `Browse ${category.count}+ free printable ${category.name} coloring pages. Download as PDF or JPEG instantly. No sign-up required.`,
+          url: `${baseUrl}/${categorySlug}-coloring-pages`,
+          isAccessibleForFree: true,
+          inLanguage: 'en-US',
+          about: {
+            '@type': 'Thing',
+            name: category.name,
+          },
+        };
+
         const faqs = await getPublishedCategoryFAQs(category.id);
         if (faqs.length > 0) {
           categoryFaqSchema = {
@@ -218,6 +233,12 @@ export default async function ColoringPageDetail({ params }: { params: Promise<{
 
     return (
       <>
+        {collectionSchema && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionSchema) }}
+          />
+        )}
         {categoryFaqSchema && (
           <script
             type="application/ld+json"
