@@ -64,6 +64,11 @@ export const metadata: Metadata = {
     "coloring pages for 3 year olds printable",
     "detailed coloring pages for adults stress relief",
   ],
+  verification: {
+    other: {
+      'msvalidate.01': '6009467D84398FAD708CD68E81135E1',
+    },
+  },
   authors: [{ name: "Paint With Purpose" }],
   creator: "Paint With Purpose",
   publisher: "Paint With Purpose",
