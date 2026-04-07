@@ -1,5 +1,8 @@
+'use client';
+
 import Link from 'next/link';
 import type { ReactNode } from 'react';
+import { event as gaEvent } from '@/lib/gtag';
 
 interface Audience {
   label: string;
@@ -82,6 +85,7 @@ export default function AgeAudienceNav() {
               key={audience.ageRange}
               href={`/free-coloring-pages?ageRange=${audience.ageRange}`}
               className={`group relative rounded-2xl p-6 sm:p-8 text-center border border-white/10 hover:border-white/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl ${audience.glow} bg-[#12121a] overflow-hidden`}
+              onClick={() => gaEvent('age_filter_click', { age_range: audience.ageRange })}
             >
               {/* Gradient top bar */}
               <div className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${audience.gradient}`} />

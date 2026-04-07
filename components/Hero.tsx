@@ -1,6 +1,8 @@
+'use client';
+
 import Image from 'next/image';
 import Link from 'next/link';
-
+import { event as gaEvent } from '@/lib/gtag';
 
 export default function Hero() {
   return (
@@ -112,6 +114,7 @@ export default function Hero() {
         <Link
           href="/free-coloring-pages"
           className="group relative inline-block"
+          onClick={() => gaEvent('hero_cta_click', { destination: '/free-coloring-pages' })}
         >
           {/* Stacked paint swatch layers - creates artistic depth */}
           <div

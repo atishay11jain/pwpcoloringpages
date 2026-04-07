@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { useState } from 'react';
+import { event as gaEvent } from '@/lib/gtag';
 
 interface ColoringBookCardProps {
   title: string;
@@ -72,6 +73,7 @@ export default function ColoringBookCard({ title, imageUrl, amazonUrl, status = 
               target="_blank"
               rel="noopener noreferrer"
               className="block w-full bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white text-center py-3 rounded-xl font-semibold transition-all duration-300 hover:shadow-lg font-dm-sans"
+              onClick={() => gaEvent('amazon_book_click', { book_title: title, book_status: status })}
             >
               Buy Now
             </a>

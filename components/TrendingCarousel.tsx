@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { event as gaEvent } from '@/lib/gtag';
 
 interface CarouselItem {
   title: string;
@@ -192,21 +193,25 @@ export default function TrendingCarousel({ items }: TrendingCarouselProps) {
 
   const handleCardClick = useCallback((index: number, href: string) => {
     if (index === activeIndex) {
+      gaEvent('carousel_page_click', { page_title: items[index].title });
       router.push(href);
     } else {
+      gaEvent('carousel_navigate', { direction: 'card', position: index });
       setActiveIndex(index);
       setIsAutoPlaying(false);
       setTimeout(() => setIsAutoPlaying(true), 10000);
     }
-  }, [activeIndex, router]);
+  }, [activeIndex, router, items]);
 
   const handlePrev = useCallback(() => {
+    gaEvent('carousel_navigate', { direction: 'prev' });
     setActiveIndex((prev) => (prev - 1 + items.length) % items.length);
     setIsAutoPlaying(false);
     setTimeout(() => setIsAutoPlaying(true), 6000);
   }, [items.length]);
 
   const handleNext = useCallback(() => {
+    gaEvent('carousel_navigate', { direction: 'next' });
     setActiveIndex((prev) => (prev + 1) % items.length);
     setIsAutoPlaying(false);
     setTimeout(() => setIsAutoPlaying(true), 6000);

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { event as gaEvent } from '@/lib/gtag';
 
 interface NewsletterModalProps {
   isOpen: boolean;
@@ -47,6 +48,7 @@ export default function NewsletterModal({ isOpen, initialEmail = '', onClose, on
       }
 
       setStatus('success');
+      gaEvent('newsletter_subscribe', { source: 'modal' });
       onSuccess?.();
     } catch {
       setStatus('error');

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { event as gaEvent } from '@/lib/gtag';
 
 interface Category {
   id: string;
@@ -45,6 +46,7 @@ function CategoryCard({ category, index }: { category: Category; index: number }
     <Link
       href={`/${category.slug}-coloring-pages`}
       className="group relative rounded-2xl overflow-hidden border border-white/10 hover:border-white/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-purple-500/20 bg-[#12121a]"
+      onClick={() => gaEvent('category_browse_click', { category_name: category.name, category_slug: category.slug })}
     >
       {/* Thumbnail */}
       <div className="relative aspect-[4/3] overflow-hidden">

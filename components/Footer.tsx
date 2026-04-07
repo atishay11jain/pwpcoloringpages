@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
+import { event as gaEvent } from '@/lib/gtag';
 
 interface ColoringBook {
   id: string;
@@ -737,6 +738,7 @@ function SocialIcon({
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      onClick={() => gaEvent('social_media_click', { platform: label.toLowerCase() })}
     >
       {icon}
     </a>

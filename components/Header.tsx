@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
+import { event as gaEvent } from '@/lib/gtag';
 
 // Paint splatter SVG component for decorative accents
 const PaintSplatter = ({ className, color }: { className?: string; color: string }) => (
@@ -83,7 +84,7 @@ const NavLink = ({
       style={{ transitionDelay: `${delay}ms` }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      onClick={onClick}
+      onClick={() => { gaEvent('nav_click', { link_text: String(children), destination: href }); onClick?.(); }}
     >
       {/* Text */}
       <span
@@ -190,6 +191,7 @@ export default function Header() {
                 mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
               }`}
               style={{ transitionDelay: '400ms' }}
+              onClick={() => gaEvent('header_cta_click', { destination: '/coloring-books' })}
             >
               {/* Stacked paint swatch layers - creates depth */}
               <div className="absolute -inset-0 translate-x-2 translate-y-2 bg-cyan-400 rounded-xl
@@ -410,7 +412,7 @@ export default function Header() {
                   : 'translate-y-8 opacity-0'
               }`}
               style={{ transitionDelay: '225ms' }}
-              onClick={() => setIsMobileMenuOpen(false)}
+              onClick={() => { setIsMobileMenuOpen(false); gaEvent('header_cta_click', { destination: '/coloring-books', source: 'mobile' }); }}
             >
               {/* Stacked swatch layers */}
               <div className="absolute inset-0 translate-x-2 translate-y-2 bg-cyan-400 rounded-2xl opacity-60"

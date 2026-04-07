@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { event as gaEvent } from '@/lib/gtag';
 
 const PERKS = ['Free forever', 'New pages weekly', 'No spam, ever'];
 
@@ -54,6 +55,7 @@ export default function NewsletterSection() {
       }
 
       setStatus('success');
+      gaEvent('newsletter_subscribe', { source: 'section' });
       setEmail('');
       setTouched(false);
     } catch {

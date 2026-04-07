@@ -4,6 +4,7 @@ import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { CategoriesProvider } from "@/lib/contexts/CategoriesContext";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
 
 const fredoka = Fredoka({
   variable: "--font-fredoka",
@@ -143,6 +144,7 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
         />
+        <GoogleAnalytics />
       </head>
       <body
         className={`${fredoka.variable} ${dmSans.variable} ${righteous.variable} antialiased`}

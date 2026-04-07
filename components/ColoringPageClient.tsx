@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { SinglePageResponse } from '@/app/api/pages/[slug]/route';
+import { event as gaEvent } from '@/lib/gtag';
 
 type ColorType = 'bw' | 'color';
 type FormatType = 'jpeg' | 'pdf';
@@ -85,6 +86,12 @@ export default function ColoringPageClient({ pageData, slug, displayTitle }: Col
       alert('Download not available for this format');
       return;
     }
+    gaEvent('coloring_page_download', {
+      page_title: pageData.title,
+      page_slug: pageData.slug,
+      format: selectedFormat,
+      color_mode: selectedColor,
+    });
     setIsDownloading(true);
     const link = document.createElement('a');
     link.href = `/api/download/${pageData.id}?format=${selectedFormat}&mode=${selectedColor}`;
@@ -115,6 +122,7 @@ export default function ColoringPageClient({ pageData, slug, displayTitle }: Col
         setRatingSum(Math.round(data.ratingValue * data.reviewCount));
         setRatingCount(data.reviewCount);
         setRatingMessage('Thank you for your rating!');
+        gaEvent('page_rating_submit', { page_slug: pageData.slug, rating_value: star });
       }
     } catch {
       setRatingMessage('Could not save rating. Please try again.');
@@ -367,7 +375,7 @@ export default function ColoringPageClient({ pageData, slug, displayTitle }: Col
                     return (
                       <button
                         key={type}
-                        onClick={() => { setSelectedColor(type); setImageLoaded(false); }}
+                        onClick={() => { setSelectedColor(type); setImageLoaded(false); gaEvent('color_mode_toggle', { mode: type }); }}
                         className={`relative group transition-all duration-300 ${selectedColor === type ? 'scale-110' : 'hover:scale-105'}`}
                         style={{ transform: `rotate(${idx === 0 ? -3 : 3}deg)` }}
                       >
@@ -509,7 +517,7 @@ export default function ColoringPageClient({ pageData, slug, displayTitle }: Col
                   <label className="block text-sm font-medium text-white/70 mb-3">Select Version</label>
                   <div className="grid grid-cols-2 gap-3">
                     <button
-                      onClick={() => { setSelectedColor('bw'); setImageLoaded(false); }}
+                      onClick={() => { setSelectedColor('bw'); setImageLoaded(false); gaEvent('color_mode_toggle', { mode: 'bw' }); }}
                       disabled={!bwAsset}
                       className={`relative p-4 rounded-xl border-2 transition-all duration-300 ${
                         selectedColor === 'bw' ? 'border-white bg-white/10' : 'border-white/10 hover:border-white/30 bg-white/5'
@@ -536,7 +544,7 @@ export default function ColoringPageClient({ pageData, slug, displayTitle }: Col
                       )}
                     </button>
                     <button
-                      onClick={() => { setSelectedColor('color'); setImageLoaded(false); }}
+                      onClick={() => { setSelectedColor('color'); setImageLoaded(false); gaEvent('color_mode_toggle', { mode: 'color' }); }}
                       disabled={!colorAsset}
                       className={`relative p-4 rounded-xl border-2 transition-all duration-300 ${
                         selectedColor === 'color' ? 'border-white bg-white/10' : 'border-white/10 hover:border-white/30 bg-white/5'
@@ -569,7 +577,7 @@ export default function ColoringPageClient({ pageData, slug, displayTitle }: Col
                   <label className="block text-sm font-medium text-white/70 mb-3">Select Format</label>
                   <div className="grid grid-cols-2 gap-3">
                     <button
-                      onClick={() => setSelectedFormat('jpeg')}
+                      onClick={() => { setSelectedFormat('jpeg'); gaEvent('format_toggle', { format: 'jpeg' }); }}
                       disabled={!selectedAsset?.jpegUrl}
                       className={`relative p-4 rounded-xl border-2 transition-all duration-300 ${
                         selectedFormat === 'jpeg' ? 'border-[#58b7da] bg-[#58b7da]/10' : 'border-white/10 hover:border-white/30 bg-white/5'
@@ -593,7 +601,7 @@ export default function ColoringPageClient({ pageData, slug, displayTitle }: Col
                       )}
                     </button>
                     <button
-                      onClick={() => setSelectedFormat('pdf')}
+                      onClick={() => { setSelectedFormat('pdf'); gaEvent('format_toggle', { format: 'pdf' }); }}
                       disabled={!selectedAsset?.pdfUrl}
                       className={`relative p-4 rounded-xl border-2 transition-all duration-300 ${
                         selectedFormat === 'pdf' ? 'border-[#ea1974] bg-[#ea1974]/10' : 'border-white/10 hover:border-white/30 bg-white/5'
