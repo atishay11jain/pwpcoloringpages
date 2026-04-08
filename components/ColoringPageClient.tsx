@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { SinglePageResponse } from '@/app/api/pages/[slug]/route';
 import { event as gaEvent } from '@/lib/gtag';
+import AdUnit from '@/components/AdUnit';
 
 type ColorType = 'bw' | 'color';
 type FormatType = 'jpeg' | 'pdf';
@@ -829,6 +830,16 @@ export default function ColoringPageClient({ pageData, slug, displayTitle }: Col
                 </div>
               </div>
 
+              {/* Ad: Below Controls — Placement A */}
+              <div className="mt-6">
+                <AdUnit
+                  slot="REPLACE_WITH_SLOT_ID_CONTROLS"
+                  format="auto"
+                  reservedHeight={250}
+                  lazy={false}
+                />
+              </div>
+
               {/* Back Link */}
               <div className="pt-6 border-t border-white/10">
                 <Link
@@ -868,6 +879,17 @@ export default function ColoringPageClient({ pageData, slug, displayTitle }: Col
                 {pageData.printingTips || PRINTING_TIPS_FALLBACK(pageData.difficulty)}
               </p>
             </div>
+          </div>
+
+          {/* Ad: Before Related Pages — Placement B */}
+          <div className="mt-10">
+            <AdUnit
+              slot="REPLACE_WITH_SLOT_ID_RELATED"
+              format="fluid"
+              layout="in-article"
+              reservedHeight={280}
+              lazy={true}
+            />
           </div>
 
           {/* ── Related Coloring Pages (full-width) ── */}

@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import ColoringPageCard from '@/components/ColoringPageCard';
+import AdUnit from '@/components/AdUnit';
 import { useCategories } from '@/lib/contexts/CategoriesContext';
 
 interface ColoringPage {
@@ -549,16 +550,29 @@ export default function CategoryColoringPages({ selectedCategorySlug = null, age
                   {pages.map((page, index) => {
                     const imageUrl = activeTab === 'bw' ? page.images.bwPreview : page.images.colorPreview;
                     return (
-                      <ColoringPageCard
-                        key={page.id}
-                        title={page.title}
-                        slug={page.slug}
-                        imageUrl={imageUrl || '/placeholder.jpg'}
-                        downloadUrl={`/api/download/${page.id}`}
-                        delay={index * 0.1}
-                        type={activeTab === 'bw' ? 'black-and-white' : 'color'}
-                        categoryName={selectedCategory?.name || ''}
-                      />
+                      <React.Fragment key={page.id}>
+                        <ColoringPageCard
+                          title={page.title}
+                          slug={page.slug}
+                          imageUrl={imageUrl || '/placeholder.jpg'}
+                          downloadUrl={`/api/download/${page.id}`}
+                          delay={index * 0.1}
+                          type={activeTab === 'bw' ? 'black-and-white' : 'color'}
+                          categoryName={selectedCategory?.name || ''}
+                        />
+                        {/* Ad: In-Feed after 6th card — Placement C */}
+                        {index === 5 && (
+                          <div className="col-span-1 sm:col-span-2 xl:col-span-3">
+                            <AdUnit
+                              slot="REPLACE_WITH_SLOT_ID_CATEGORY_INFEED"
+                              format="fluid"
+                              layout="in-feed"
+                              reservedHeight={200}
+                              lazy={true}
+                            />
+                          </div>
+                        )}
+                      </React.Fragment>
                     );
                   })}
                 </div>
@@ -952,6 +966,18 @@ export default function CategoryColoringPages({ selectedCategorySlug = null, age
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Ad: After FAQ Section — Placement D */}
+      <section className="py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <AdUnit
+            slot="REPLACE_WITH_SLOT_ID_CATEGORY_FOOTER"
+            format="auto"
+            reservedHeight={90}
+            lazy={true}
+          />
         </div>
       </section>
     </main>
