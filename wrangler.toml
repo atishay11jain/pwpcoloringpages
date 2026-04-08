@@ -11,6 +11,7 @@ CLOUDFLARE_R2_PUBLIC_URL = "https://pub-0037b41e1ebf4ce1908195b0cbc51cff.r2.dev"
 CLOUDFLARE_R2_BUCKET = "coloring-pages-storage"
 NEXTAUTH_URL = "https://pwpcoloringpages.com"
 NEXT_PUBLIC_GA_ID = "G-4KF52TL6XE"
+NEXT_PUBLIC_ADSENSE_PUBLISHER_ID = "ca-pub-7080315026102417"
 
 [assets]
 directory = ".open-next/assets"

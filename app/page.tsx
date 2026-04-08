@@ -8,6 +8,7 @@ import SeasonalSpotlight from '@/components/SeasonalSpotlight';
 import EditorialSEOBlock from '@/components/EditorialSEOBlock';
 import HomeFAQSection from '@/components/HomeFAQSection';
 import NewsletterSection from '@/components/NewsletterSection';
+import AdUnit from '@/components/AdUnit';
 import { getPopularPages } from '@/lib/db';
 import { getPublicUrl } from '@/lib/r2';
 
@@ -56,6 +57,16 @@ export default async function Home() {
       {/* 4. Browse by Category Grid */}
       <BrowseByCategoryGrid />
 
+      {/* Ad: Homepage Mid-Page — Placement E */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
+        <AdUnit
+          slot="REPLACE_WITH_SLOT_ID_HOME_MID"
+          format="auto"
+          reservedHeight={90}
+          lazy={true}
+        />
+      </div>
+
       {/* 5. Recently Added */}
       <RecentlyAddedSection />
 
@@ -67,6 +78,17 @@ export default async function Home() {
 
       {/* 8. Editorial SEO Text Block */}
       <EditorialSEOBlock />
+
+      {/* Ad: Homepage Pre-FAQ — Placement F */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <AdUnit
+          slot="REPLACE_WITH_SLOT_ID_HOME_FAQ"
+          format="fluid"
+          layout="in-article"
+          reservedHeight={280}
+          lazy={true}
+        />
+      </div>
 
       {/* 9. FAQ Section */}
       <HomeFAQSection />
