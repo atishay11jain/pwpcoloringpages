@@ -68,6 +68,7 @@ export const metadata: Metadata = {
   verification: {
     other: {
       'msvalidate.01': '6009467DB44398FAD708CD68EB1135E1',
+      'p:domain_verify': '595fa54bd9de67ab5367e6779ad02297',
     },
   },
   authors: [{ name: "Paint With Purpose" }],
