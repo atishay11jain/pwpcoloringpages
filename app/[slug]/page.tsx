@@ -10,7 +10,9 @@ import {
   getColoringPageWithAssets,
   getRelatedCategories,
   getCategoryById,
+  getPageFAQs,
   type ColoringPageAsset,
+  type PageFAQ,
 } from '@/lib/db';
 import { getPublicAssetUrl } from '@/lib/url-utils';
 
@@ -54,6 +56,13 @@ async function getColoringPage(slug: string): Promise<SinglePageResponse | null>
       ratingSum: page.rating_sum ?? 0,
       ratingCount: page.rating_count ?? 0,
       printingTips: page.printing_tips ?? null,
+      coloringGuide: page.coloring_guide ?? null,
+      colorPalette: (() => {
+        if (!page.color_palette) return null;
+        try { return JSON.parse(page.color_palette); } catch { return null; }
+      })(),
+      subjectInfo: page.subject_info ?? null,
+      pageFaqs: [],
       meta: {
         title: page.meta_title,
         description: page.meta_description,
@@ -264,6 +273,71 @@ export default async function ColoringPageDetail({ params }: { params: Promise<{
   // Strip trailing "Coloring Page" from title to prevent H1 duplication
   const displayTitle = pageData.title.replace(/\s*coloring\s*page\s*$/i, '').trim();
 
+  // Fetch DB-stored per-page FAQs (graceful fallback — derived FAQs always render)
+  let dbPageFaqs: PageFAQ[] = [];
+  try {
+    dbPageFaqs = await getPageFAQs(pageData.id);
+  } catch { /* DB unavailable — continue with derived FAQs only */ }
+
+  const enrichedPageData = { ...pageData, pageFaqs: dbPageFaqs };
+
+  // Derived FAQs — computed from existing fields, always rendered on every page
+  const SUPPLIES_BY_DIFFICULTY: Record<string, string> = {
+    Easy: 'Crayons, washable markers, or thick colored pencils work best. The large, simple areas are ideal for beginners and young children.',
+    Medium: 'Colored pencils or fine-tipped markers work great. A set of 24+ colors gives you plenty of choices for the varied details.',
+    Hard: 'Fine-tipped colored pencils or gel pens give you the control needed for intricate lines. Alcohol-based markers work well for a smoother, blended finish.',
+  };
+  const supplyAnswer = SUPPLIES_BY_DIFFICULTY[pageData.difficulty ?? ''] ?? SUPPLIES_BY_DIFFICULTY.Medium;
+
+  const derivedFAQs = [
+    {
+      question: `Is this ${displayTitle} coloring page free?`,
+      answer: `Yes — this ${displayTitle} coloring page is completely free to download and print. No account, no sign-up, and no hidden cost. Click the download button to get your copy as a high-resolution PDF or JPEG instantly.`,
+    },
+    {
+      question: `What age is the ${displayTitle} coloring page suitable for?`,
+      answer: pageData.ageRange
+        ? `This coloring page is designed for children aged ${pageData.ageRange}. The line art complexity is matched to that age group, making it engaging without being frustrating.`
+        : `This coloring page is suitable for a wide range of ages. Check the difficulty badge on the page for a specific recommendation.`,
+    },
+    {
+      question: `How difficult is the ${displayTitle} coloring page?`,
+      answer: pageData.difficulty === 'Easy'
+        ? `This is an Easy difficulty coloring page with bold outlines and large areas — perfect for toddlers, preschoolers, and anyone who prefers a relaxed coloring experience.`
+        : pageData.difficulty === 'Medium'
+        ? `This is a Medium difficulty page with moderate detail, ideal for school-age children and adults who enjoy a gentle creative challenge.`
+        : pageData.difficulty === 'Hard'
+        ? `This is a Hard difficulty page with intricate linework. It is best suited for older children, teens, and adults who enjoy detailed, meditative coloring.`
+        : `The difficulty of this page suits a range of colorists — check the difficulty badge displayed on the page for the specific rating.`,
+    },
+    {
+      question: `What coloring supplies work best for this page?`,
+      answer: supplyAnswer,
+    },
+    {
+      question: `Can I use this coloring page in my classroom?`,
+      answer: `Absolutely. All coloring pages on Paint With Purpose are free for personal and educational use. Teachers, homeschool parents, and therapists are welcome to print and distribute them in classrooms or therapy sessions at no cost. Please do not redistribute the files digitally or sell them.`,
+    },
+    {
+      question: `What file formats can I download?`,
+      answer: `You can download this coloring page as a high-resolution JPEG image or as a print-ready PDF. Both formats are optimized for standard US Letter (8.5×11") and A4 paper. PDF is best for printing at home; JPEG works great for digital use or if you want to adjust the image before printing.`,
+    },
+  ];
+
+  // FAQPage JSON-LD — combines derived + DB-stored page FAQs
+  const faqPageSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: [
+      ...derivedFAQs,
+      ...dbPageFaqs.map(f => ({ question: f.question, answer: f.answer })),
+    ].map(f => ({
+      '@type': 'Question',
+      name: f.question,
+      acceptedAnswer: { '@type': 'Answer', text: f.answer },
+    })),
+  };
+
   // BW thumbnail for structured data
   const bwAsset = pageData.assets.find(a => a.mode === 'bw');
   const thumbnailUrl = bwAsset?.thumbnailUrl ?? bwAsset?.jpegUrl ?? null;
@@ -337,8 +411,17 @@ export default async function ColoringPageDetail({ params }: { params: Promise<{
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqPageSchema) }}
+      />
       <Suspense fallback={<LoadingFallback />}>
-        <ColoringPageClient pageData={pageData} slug={slug} displayTitle={displayTitle} />
+        <ColoringPageClient
+          pageData={enrichedPageData}
+          slug={slug}
+          displayTitle={displayTitle}
+          derivedFAQs={derivedFAQs}
+        />
       </Suspense>
     </main>
   );

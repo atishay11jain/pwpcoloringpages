@@ -135,6 +135,9 @@ export interface ColoringPage {
   rating_sum: number;
   rating_count: number;
   printing_tips: string | null;
+  coloring_guide: string | null;
+  color_palette: string | null;
+  subject_info: string | null;
   updated_at: string;
 }
 
@@ -154,6 +157,13 @@ export interface Category {
   thumbnail_url: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface PageFAQ {
+  id: string;
+  question: string;
+  answer: string;
+  sort_order: number;
 }
 
 export interface HomeFAQ {
@@ -1107,4 +1117,18 @@ export async function getPublishedCategoryFAQs(categoryId: string): Promise<Publ
     ORDER BY sort_order ASC, id ASC
   `;
   return query<PublicCategoryFAQ>(sql, [categoryId]);
+}
+
+// ============================================================================
+// Page FAQs (per individual coloring page)
+// ============================================================================
+
+export async function getPageFAQs(coloringPageId: string): Promise<PageFAQ[]> {
+  const sql = `
+    SELECT id, question, answer, sort_order
+    FROM page_faqs
+    WHERE coloring_page_id = ? AND is_published = 1
+    ORDER BY sort_order ASC, id ASC
+  `;
+  return query<PageFAQ>(sql, [coloringPageId]);
 }

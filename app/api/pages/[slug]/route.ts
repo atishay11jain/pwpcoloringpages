@@ -39,6 +39,10 @@ export interface SinglePageResponse {
   ratingSum: number;
   ratingCount: number;
   printingTips: string | null;
+  coloringGuide: string | null;
+  colorPalette: Array<{ color: string; label: string }> | null;
+  subjectInfo: string | null;
+  pageFaqs: Array<{ id: string; question: string; answer: string; sort_order: number }>;
   meta: {
     title: string | null;
     description: string | null;
@@ -107,6 +111,13 @@ export async function GET(
       ratingSum: page.rating_sum ?? 0,
       ratingCount: page.rating_count ?? 0,
       printingTips: page.printing_tips ?? null,
+      coloringGuide: page.coloring_guide ?? null,
+      colorPalette: (() => {
+        if (!page.color_palette) return null;
+        try { return JSON.parse(page.color_palette); } catch { return null; }
+      })(),
+      subjectInfo: page.subject_info ?? null,
+      pageFaqs: [],
       meta: {
         title: page.meta_title,
         description: page.meta_description,
