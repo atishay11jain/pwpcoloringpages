@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import ColoringPageCard from '@/components/ColoringPageCard';
-import AdUnit from '@/components/AdUnit';
+// import AdUnit from '@/components/AdUnit'; // TEMP: disabled until AdSense approval
 import { useCategories } from '@/lib/contexts/CategoriesContext';
 
 interface ColoringPage {
@@ -560,7 +560,8 @@ export default function CategoryColoringPages({ selectedCategorySlug = null, age
                           type={activeTab === 'bw' ? 'black-and-white' : 'color'}
                           categoryName={selectedCategory?.name || ''}
                         />
-                        {/* Ad: In-Feed after 6th card — Placement C */}
+                        {/* Ad: In-Feed after 6th card — Placement C — TEMP: disabled until AdSense approval */}
+                        {/*
                         {index === 5 && (
                           <div className="col-span-1 sm:col-span-2 xl:col-span-3">
                             <AdUnit
@@ -572,6 +573,7 @@ export default function CategoryColoringPages({ selectedCategorySlug = null, age
                             />
                           </div>
                         )}
+                        */}
                       </React.Fragment>
                     );
                   })}
@@ -969,7 +971,8 @@ export default function CategoryColoringPages({ selectedCategorySlug = null, age
         </div>
       </section>
 
-      {/* Ad: After FAQ Section — Placement D */}
+      {/* Ad: After FAQ Section — Placement D — TEMP: disabled until AdSense approval */}
+      {/*
       <section className="py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <AdUnit
@@ -980,6 +983,7 @@ export default function CategoryColoringPages({ selectedCategorySlug = null, age
           />
         </div>
       </section>
+      */}
     </main>
   );
 }

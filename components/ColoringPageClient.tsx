@@ -6,7 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { SinglePageResponse } from '@/app/api/pages/[slug]/route';
 import { event as gaEvent } from '@/lib/gtag';
-import AdUnit from '@/components/AdUnit';
+// import AdUnit from '@/components/AdUnit'; // TEMP: disabled until AdSense approval
 
 type ColorType = 'bw' | 'color';
 type FormatType = 'jpeg' | 'pdf';
@@ -19,10 +19,47 @@ interface RelatedPage {
   categoryName: string | null;
 }
 
+interface PageFAQDatum {
+  question: string;
+  answer: string;
+}
+
 interface ColoringPageClientProps {
   pageData: SinglePageResponse;
   slug: string;
   displayTitle: string;
+  derivedFAQs: PageFAQDatum[];
+}
+
+function PageFAQItem({ q, a, isOpen, onToggle }: {
+  q: string; a: string; isOpen: boolean; onToggle: () => void;
+}) {
+  return (
+    <div className="border border-white/[0.07] rounded-xl overflow-hidden hover:border-white/[0.14] transition-colors duration-200">
+      <button
+        type="button"
+        onClick={onToggle}
+        className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left bg-white/[0.03] hover:bg-white/[0.06] transition-colors"
+        aria-expanded={isOpen}
+      >
+        <span className="text-white font-semibold font-dm-sans text-sm sm:text-base leading-snug pr-2">
+          {q}
+        </span>
+        <span className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center border transition-all duration-300 ${
+          isOpen ? 'border-[#ea1974]/60 bg-[#ea1974]/10 rotate-45' : 'border-white/20 bg-white/5'
+        }`}>
+          <svg className="w-3.5 h-3.5 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 4v16m8-8H4" />
+          </svg>
+        </span>
+      </button>
+      <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
+        <p className="px-5 py-4 text-white/65 font-dm-sans text-sm leading-relaxed border-t border-white/[0.07]">
+          {a}
+        </p>
+      </div>
+    </div>
+  );
 }
 
 const PRINTING_TIPS_FALLBACK = (difficulty: string | null) =>
@@ -34,7 +71,7 @@ const PRINTING_TIPS_FALLBACK = (difficulty: string | null) =>
       : 'Colored pencils or markers both work well for this design.'
   }`;
 
-export default function ColoringPageClient({ pageData, slug, displayTitle }: ColoringPageClientProps) {
+export default function ColoringPageClient({ pageData, slug, displayTitle, derivedFAQs }: ColoringPageClientProps) {
   const searchParams = useSearchParams();
   const initialType = searchParams.get('type') === 'color' ? 'color' : 'bw';
 
@@ -54,6 +91,9 @@ export default function ColoringPageClient({ pageData, slug, displayTitle }: Col
 
   // Related pages state
   const [relatedPages, setRelatedPages] = useState<RelatedPage[]>([]);
+
+  // FAQ accordion state (first item open by default)
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
 
   // Check if user already voted (localStorage)
   useEffect(() => {
@@ -830,7 +870,8 @@ export default function ColoringPageClient({ pageData, slug, displayTitle }: Col
                 </div>
               </div>
 
-              {/* Ad: Below Controls — Placement A */}
+              {/* Ad: Below Controls — Placement A — TEMP: disabled until AdSense approval */}
+              {/*
               <div className="mt-6">
                 <AdUnit
                   slot="REPLACE_WITH_SLOT_ID_CONTROLS"
@@ -839,6 +880,7 @@ export default function ColoringPageClient({ pageData, slug, displayTitle }: Col
                   lazy={false}
                 />
               </div>
+              */}
 
               {/* Back Link */}
               <div className="pt-6 border-t border-white/10">
@@ -881,7 +923,113 @@ export default function ColoringPageClient({ pageData, slug, displayTitle }: Col
             </div>
           </div>
 
-          {/* Ad: Before Related Pages — Placement B */}
+          {/* ── Section 1: How to Color This Page (conditional) ── */}
+          {pageData.coloringGuide && (
+            <section className="mt-10 pt-8 border-t border-white/[0.07]">
+              <div className="relative overflow-hidden rounded-2xl bg-[#111118] border border-white/[0.07] p-6 sm:p-8">
+                <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full blur-[100px] opacity-[0.06] pointer-events-none"
+                  style={{ background: 'radial-gradient(circle, #ea1974, transparent 65%)' }} />
+                <div className="flex items-center gap-3 mb-5">
+                  <span className="font-mono text-[10px] font-bold tracking-[0.32em] uppercase text-[#ea1974]">01</span>
+                  <div className="h-px flex-1" style={{ background: 'linear-gradient(to right, rgba(234,25,116,0.4), rgba(234,25,116,0.1), transparent)' }} />
+                </div>
+                <h2 className="font-fredoka font-bold text-white text-2xl sm:text-3xl mb-1">
+                  How to Color This {displayTitle} Page
+                </h2>
+                <p className="text-white/40 font-dm-sans text-sm mb-6">Step-by-step guide for the best results</p>
+                <div className="space-y-4">
+                  {pageData.coloringGuide.split('\n').filter(Boolean).map((step, i) => (
+                    <div key={i} className="flex gap-4 items-start">
+                      <span className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white mt-0.5"
+                        style={{ background: 'linear-gradient(135deg, #ea1974, #bc25c4)' }}>
+                        {i + 1}
+                      </span>
+                      <p className="font-dm-sans text-white/70 text-sm leading-relaxed">{step}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* ── Section 2: Color Palette (conditional) ── */}
+          {pageData.colorPalette && pageData.colorPalette.length > 0 && (
+            <section className="mt-6">
+              <div className="relative overflow-hidden rounded-2xl bg-[#111118] border border-white/[0.07] p-6 sm:p-8">
+                <div className="absolute -bottom-12 -left-12 w-48 h-48 rounded-full blur-[100px] opacity-[0.06] pointer-events-none"
+                  style={{ background: 'radial-gradient(circle, #bc25c4, transparent 65%)' }} />
+                <div className="flex items-center gap-3 mb-5">
+                  <span className="font-mono text-[10px] font-bold tracking-[0.32em] uppercase text-[#bc25c4]">02</span>
+                  <div className="h-px flex-1" style={{ background: 'linear-gradient(to right, rgba(188,37,196,0.4), rgba(188,37,196,0.1), transparent)' }} />
+                </div>
+                <h2 className="font-fredoka font-bold text-white text-2xl sm:text-3xl mb-1">Suggested Color Palette</h2>
+                <p className="text-white/40 font-dm-sans text-sm mb-6">Recommended colors for each element of this design</p>
+                <div className="flex flex-wrap gap-5">
+                  {pageData.colorPalette.map((swatch, i) => (
+                    <div key={i} className="flex flex-col items-center gap-2 group">
+                      <div className="w-12 h-12 rounded-full shadow-lg ring-2 ring-white/10 group-hover:ring-white/30 transition-all duration-200"
+                        style={{ backgroundColor: swatch.color }} title={swatch.color} />
+                      <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold text-white/55 bg-white/5 border border-white/10">
+                        {swatch.color}
+                      </span>
+                      <span className="text-xs text-white/50 font-dm-sans text-center max-w-[80px] leading-tight">{swatch.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* ── Section 3: Subject / Educational Context (conditional) ── */}
+          {pageData.subjectInfo && (
+            <section className="mt-6">
+              <div className="relative overflow-hidden rounded-2xl bg-[#111118] border border-white/[0.07] p-6 sm:p-8">
+                <div className="absolute -top-12 -right-12 w-56 h-56 rounded-full blur-[100px] opacity-[0.06] pointer-events-none"
+                  style={{ background: 'radial-gradient(circle, #58b7da, transparent 65%)' }} />
+                <div className="flex items-center gap-3 mb-5">
+                  <span className="font-mono text-[10px] font-bold tracking-[0.32em] uppercase text-[#58b7da]">03</span>
+                  <div className="h-px flex-1" style={{ background: 'linear-gradient(to right, rgba(88,183,218,0.4), rgba(88,183,218,0.1), transparent)' }} />
+                </div>
+                <h2 className="font-fredoka font-bold text-white text-2xl sm:text-3xl mb-1">About {displayTitle}</h2>
+                <p className="text-white/40 font-dm-sans text-sm mb-6">Why this theme is great for coloring</p>
+                <p className="font-dm-sans text-white/70 text-sm leading-relaxed">{pageData.subjectInfo}</p>
+              </div>
+            </section>
+          )}
+
+          {/* ── Section 4: FAQ — always rendered ── */}
+          {(() => {
+            const allFaqs: PageFAQDatum[] = [
+              ...derivedFAQs,
+              ...pageData.pageFaqs.map(f => ({ question: f.question, answer: f.answer })),
+            ];
+            return (
+              <section className="mt-10 pt-8 border-t border-white/[0.07]">
+                <div className="mb-7">
+                  <h2 className="font-fredoka font-bold text-white text-2xl sm:text-3xl mb-1">
+                    Frequently Asked Questions
+                  </h2>
+                  <p className="text-white/40 font-dm-sans text-sm">
+                    Everything you need to know about this {displayTitle} coloring page
+                  </p>
+                </div>
+                <div className="space-y-3">
+                  {allFaqs.map((faq, i) => (
+                    <PageFAQItem
+                      key={i}
+                      q={faq.question}
+                      a={faq.answer}
+                      isOpen={openFaqIndex === i}
+                      onToggle={() => setOpenFaqIndex(openFaqIndex === i ? null : i)}
+                    />
+                  ))}
+                </div>
+              </section>
+            );
+          })()}
+
+          {/* Ad: Before Related Pages — Placement B — TEMP: disabled until AdSense approval */}
+          {/*
           <div className="mt-10">
             <AdUnit
               slot="REPLACE_WITH_SLOT_ID_RELATED"
@@ -891,6 +1039,7 @@ export default function ColoringPageClient({ pageData, slug, displayTitle }: Col
               lazy={true}
             />
           </div>
+          */}
 
           {/* ── Related Coloring Pages (full-width) ── */}
           {relatedPages.length > 0 && (
